@@ -50,7 +50,7 @@ const FileUploadPage = () => {
             </header>
 
             {/* Main content */}
-            <main className="flex-grow container mx-auto p-8">
+            <main>
                 <FileUpload.RootProvider value={fileUpload}>
                     <FileUpload.Dropzone className="border-4 border-dashed rounded-lg p-8 flex flex-col items-center justify-center min-h-96 transition-colors border-neutral bg-base-200">
                         {!isFileUploaded ? (
@@ -127,6 +127,11 @@ const FileUploadPage = () => {
                     </p>
                 </div>
             </section>
+
+            <footer className="flex items-center justify-end gap-1 p-4 text-xs">
+                <span className="text-neutral-500">© {new Date().getFullYear()}</span>{" "}
+                <a href="https://kamilmarut.com">KAMILMARUT.COM</a>
+            </footer>
         </div>
     );
 };
