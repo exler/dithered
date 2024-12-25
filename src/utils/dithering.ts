@@ -1,3 +1,7 @@
+/* References:
+ * https://tannerhelland.com/2012/12/28/dithering-eleven-algorithms-source-code.html
+ */
+
 import { convertImageDataToDataURL, getImageDataFromFile } from "./image";
 
 export enum DitheringMethod {

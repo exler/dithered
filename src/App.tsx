@@ -3,14 +3,20 @@ import { LuGithub } from "react-icons/lu";
 
 import { useEffect, useState } from "react";
 import Logo from "./assets/logo.png";
+import ImageCompare from "./components/ImageCompare";
 import { DitheringMethod, ditherImage } from "./utils/dithering";
 
 const FileUploadPage = () => {
+    const [originalImageURL, setOriginalImageURL] = useState<string | null>(null);
     const [ditheringMethod, setDitheringMethod] = useState<DitheringMethod>(DitheringMethod.FloydSteinberg);
     const [ditheredImage, setDitheredImage] = useState<string | null>(null);
 
-    const fileUpload = useFileUpload({ maxFiles: 1, accept: "image/*" });
+    const fileUpload = useFileUpload({ maxFiles: 1, accept: "image/*", disabled: !!originalImageURL });
     const isFileUploaded = fileUpload.acceptedFiles.length > 0;
+
+    useEffect(() => {
+        setOriginalImageURL(isFileUploaded ? URL.createObjectURL(fileUpload.acceptedFiles[0]) : null);
+    }, [isFileUploaded, fileUpload.acceptedFiles]);
 
     useEffect(() => {
         const processDithering = async () => {
@@ -22,7 +28,7 @@ const FileUploadPage = () => {
                 setDitheredImage(dataUrl);
             } catch (error) {
                 console.error("Failed to process image:", error);
-                // Here you might want to show an error message to the user
+                // TODO: Show error message to the user
             }
         };
 
@@ -52,7 +58,7 @@ const FileUploadPage = () => {
             {/* Main content */}
             <main>
                 <FileUpload.RootProvider value={fileUpload}>
-                    <FileUpload.Dropzone className="border-4 border-dashed rounded-lg p-8 flex flex-col items-center justify-center min-h-96 transition-colors border-neutral bg-base-200">
+                    <FileUpload.Dropzone className="w-full border-4 border-dashed rounded-lg p-8 flex flex-col items-center justify-center min-h-96 transition-colors border-neutral bg-base-200">
                         {!isFileUploaded ? (
                             <>
                                 <FileUpload.Trigger className="btn btn-primary">Choose file(s)</FileUpload.Trigger>
@@ -61,39 +67,18 @@ const FileUploadPage = () => {
                                 </FileUpload.Label>
                             </>
                         ) : (
-                            <FileUpload.ItemGroup>
-                                <FileUpload.Context>
-                                    {({ acceptedFiles }) =>
-                                        acceptedFiles.map((file) => (
-                                            <div key={file.name} className="space-y-4">
-                                                <div className="text-center font-semibold mb-2">Original Image</div>
-                                                <FileUpload.Item file={file}>
-                                                    <FileUpload.ItemPreview type="image/*">
-                                                        <FileUpload.ItemPreviewImage />
-                                                    </FileUpload.ItemPreview>
-                                                    {/* 
-                                                <FileUpload.ItemName />
-                                                <FileUpload.ItemSizeText />
-                                                <FileUpload.ItemDeleteTrigger>X</FileUpload.ItemDeleteTrigger> 
-                                                */}
-                                                </FileUpload.Item>
-                                                {ditheredImage && (
-                                                    <>
-                                                        <div className="text-center font-semibold mt-6 mb-2">
-                                                            Dithered Image
-                                                        </div>
-                                                        <img
-                                                            src={ditheredImage}
-                                                            alt="Dithered result"
-                                                            className="max-w-full h-auto rounded-lg"
-                                                        />
-                                                    </>
-                                                )}
-                                            </div>
-                                        ))
-                                    }
-                                </FileUpload.Context>
-                            </FileUpload.ItemGroup>
+                            <>
+                                <button
+                                    type="button"
+                                    className="btn btn-sm btn-primary mb-4 mr-auto"
+                                    onClick={fileUpload.clearFiles}
+                                >
+                                    Clear image
+                                </button>
+                                {originalImageURL && ditheredImage && (
+                                    <ImageCompare beforeImage={originalImageURL} afterImage={ditheredImage} />
+                                )}
+                            </>
                         )}
 
                         <FileUpload.HiddenInput />
