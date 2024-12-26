@@ -6,46 +6,43 @@ import Logo from "./assets/logo.png";
 import ImageCompare from "./components/ImageCompare";
 import ImageModificationTable from "./components/ImageModificationTable";
 import { DitheringMethod, ditherImage } from "./utils/dithering";
+import { convertImageDataToDataURL, getImageDataFromFile } from "./utils/image";
 
 const FileUploadPage = () => {
     const [ditheringMethod, setDitheringMethod] = useState<DitheringMethod>(DitheringMethod.FloydSteinberg);
 
     const [imageSize, setImageSize] = useState<{ width: number; height: number } | null>(null);
 
-    const [originalImageURL, setOriginalImageURL] = useState<string>("");
-    const [ditheredImageURL, setDitheredImageURL] = useState<string>("");
+    const [originalImageData, setOriginalImageData] = useState<ImageData | null>(null);
+    const [ditheredImageData, setDitheredImageData] = useState<ImageData | null>(null);
 
-    const fileUpload = useFileUpload({ maxFiles: 1, accept: "image/*", disabled: !!originalImageURL });
-    const isFileUploaded = fileUpload.acceptedFiles.length > 0;
-
-    useEffect(() => {
-        if (isFileUploaded) {
-            const img = new Image();
-            img.onload = () => setImageSize({ width: img.width, height: img.height });
-            img.src = URL.createObjectURL(fileUpload.acceptedFiles[0]);
-            setOriginalImageURL(img.src);
-        } else {
-            setImageSize(null);
-            setOriginalImageURL("");
-        }
-    }, [isFileUploaded, fileUpload.acceptedFiles]);
+    const fileUpload = useFileUpload({ maxFiles: 1, accept: "image/*", disabled: !!originalImageData });
+    const uploadedFile = fileUpload.acceptedFiles.length > 0 ? fileUpload.acceptedFiles[0] : null;
 
     useEffect(() => {
-        const processDithering = async () => {
-            if (!isFileUploaded) return;
+        const processImage = async () => {
+            if (!uploadedFile) {
+                setOriginalImageData(null);
+                setDitheredImageData(null);
+                setImageSize(null);
+                return;
+            }
 
             try {
                 const file = fileUpload.acceptedFiles[0];
-                const dataUrl = await ditherImage(file, ditheringMethod);
-                setDitheredImageURL(dataUrl);
+                const imgData = await getImageDataFromFile(file);
+                setOriginalImageData(imgData);
+                setImageSize({ width: imgData.width, height: imgData.height });
+
+                const dithered = await ditherImage(imgData, ditheringMethod);
+                setDitheredImageData(dithered);
             } catch (error) {
                 console.error("Failed to process image:", error);
-                // TODO: Show error message to the user
             }
         };
 
-        processDithering();
-    }, [isFileUploaded, ditheringMethod, fileUpload.acceptedFiles]);
+        processImage();
+    }, [uploadedFile, ditheringMethod, fileUpload.acceptedFiles]);
 
     return (
         <div className="max-w-4xl mx-auto">
@@ -71,7 +68,7 @@ const FileUploadPage = () => {
             <main>
                 <FileUpload.RootProvider value={fileUpload}>
                     <FileUpload.Dropzone className="w-full border-4 border-dashed rounded-lg p-8 flex flex-col items-center justify-center min-h-96 transition-colors border-neutral bg-base-200">
-                        {!isFileUploaded ? (
+                        {!uploadedFile ? (
                             <>
                                 <FileUpload.Trigger className="btn btn-primary">Choose file(s)</FileUpload.Trigger>
                                 <FileUpload.Label className="text-center text-base-content/70">
@@ -87,12 +84,12 @@ const FileUploadPage = () => {
                                 >
                                     Clear image
                                 </button>
-                                {originalImageURL && ditheredImageURL && imageSize && (
+                                {originalImageData && ditheredImageData && imageSize && (
                                     <ImageCompare
-                                        beforeImage={originalImageURL}
-                                        afterImage={ditheredImageURL}
-                                        width={imageSize.width}
-                                        height={imageSize.height}
+                                        beforeImage={convertImageDataToDataURL(originalImageData)}
+                                        afterImage={convertImageDataToDataURL(ditheredImageData)}
+                                        width={originalImageData.width}
+                                        height={originalImageData.height}
                                     />
                                 )}
                             </>
@@ -116,7 +113,18 @@ const FileUploadPage = () => {
                     </label>
                 </div>
 
-                <ImageModificationTable />
+                {originalImageData && ditheredImageData && uploadedFile && (
+                    <div className="xl:fixed bottom-4 right-4 md:w-80 w-full px-4 md:px-0 bg-base-200 rounded-md">
+                        <span className="flex justify-center items-center pt-4 text-sm text-gray-600">
+                            File: <span className="pl-1 font-bold">{uploadedFile.name}</span>
+                        </span>
+                        <ImageModificationTable
+                            originalFileSize={uploadedFile.size}
+                            originalImageData={originalImageData}
+                            ditheredImageData={ditheredImageData}
+                        />
+                    </div>
+                )}
             </main>
 
             {/* Usage section */}

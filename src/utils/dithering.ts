@@ -2,8 +2,6 @@
  * https://tannerhelland.com/2012/12/28/dithering-eleven-algorithms-source-code.html
  */
 
-import { convertImageDataToDataURL, getImageDataFromFile } from "./image";
-
 export enum DitheringMethod {
     FloydSteinberg = "floydSteinberg",
     Stucki = "stucki",
@@ -117,9 +115,8 @@ const stucki: ImageProcessor = (imageData) => {
     return new ImageData(data, width, height);
 };
 
-export const ditherImage = async (file: File, ditheringMethod: DitheringMethod): Promise<string> => {
-    const imageData = await getImageDataFromFile(file);
+export const ditherImage = async (imageData: ImageData, ditheringMethod: DitheringMethod): Promise<ImageData> => {
     const processor = ditheringMethod === DitheringMethod.FloydSteinberg ? floydSteinberg : stucki;
     const ditheredData = processor(imageData);
-    return convertImageDataToDataURL(ditheredData);
+    return ditheredData;
 };
