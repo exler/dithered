@@ -4,6 +4,7 @@ import { LuGithub } from "react-icons/lu";
 import { useEffect, useState } from "react";
 import Logo from "./assets/logo.png";
 import ImageCompare from "./components/ImageCompare";
+import ImageModificationTable from "./components/ImageModificationTable";
 import { DitheringMethod, ditherImage } from "./utils/dithering";
 
 const FileUploadPage = () => {
@@ -98,6 +99,8 @@ const FileUploadPage = () => {
                         </select>
                     </label>
                 </div>
+
+                <ImageModificationTable />
             </main>
 
             {/* Usage section */}
