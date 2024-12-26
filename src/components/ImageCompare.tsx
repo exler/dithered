@@ -5,9 +5,14 @@ import { twMerge } from "tailwind-merge";
 type ImageCompareProps = {
     beforeImage: string;
     afterImage: string;
+    width: number;
+    height: number;
     className?: string;
 };
-const ImageCompare = ({ beforeImage, afterImage, className }: ImageCompareProps) => {
+const ImageCompare = ({ beforeImage, afterImage, width, height, className }: ImageCompareProps) => {
+    const maxHeight = 600;
+
+    const [containerSize, setContainerSize] = useState({ width: 0, height: 0 });
     const [sliderPosition, setSliderPosition] = useState(50);
     const [isDragging, setIsDragging] = useState(false);
     const containerRef = useRef<HTMLDivElement>(null);
@@ -45,11 +50,21 @@ const ImageCompare = ({ beforeImage, afterImage, className }: ImageCompareProps)
         };
     }, [isDragging]);
 
+    // Change the height to maxHeight
+    // and adjust the width to maintain the aspect ratio
+    useEffect(() => {
+        const ratio = width / height;
+        const newHeight = maxHeight;
+        const newWidth = maxHeight * ratio;
+        setContainerSize({ width: newWidth, height: newHeight });
+    }, [width, height]);
+
     return (
         <div
             ref={containerRef}
+            style={{ width: containerSize.width, height: containerSize.height }}
             className={twMerge(
-                "relative w-full h-96 aspect-auto overflow-hidden rounded-lg cursor-ew-resize select-none",
+                "relative aspect-auto w-full max-w-80 md:max-w-screen-sm max-h-96 overflow-hidden rounded-lg cursor-ew-resize select-none",
                 className,
             )}
             onMouseDown={() => setIsDragging(true)}
@@ -57,7 +72,7 @@ const ImageCompare = ({ beforeImage, afterImage, className }: ImageCompareProps)
         >
             {/* Overlay layer - Dithered image */}
             <div className="absolute top-0 left-0 w-full h-full">
-                <img src={afterImage} alt="After" className="absolute top-0 left-0 w-full h-full object-cover" />
+                <img src={afterImage} alt="After" className="absolute top-0 left-0 w-full h-full object-contain" />
             </div>
 
             {/* Base layer - Original image */}
@@ -67,7 +82,7 @@ const ImageCompare = ({ beforeImage, afterImage, className }: ImageCompareProps)
                     clipPath: `inset(0 ${100 - sliderPosition}% 0 0)`,
                 }}
                 alt="Before"
-                className="absolute top-0 left-0 w-full h-full object-cover"
+                className="absolute top-0 left-0 w-full h-full object-contain"
             />
 
             {/* Slider line */}

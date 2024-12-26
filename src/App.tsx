@@ -8,15 +8,26 @@ import ImageModificationTable from "./components/ImageModificationTable";
 import { DitheringMethod, ditherImage } from "./utils/dithering";
 
 const FileUploadPage = () => {
-    const [originalImageURL, setOriginalImageURL] = useState<string | null>(null);
     const [ditheringMethod, setDitheringMethod] = useState<DitheringMethod>(DitheringMethod.FloydSteinberg);
-    const [ditheredImage, setDitheredImage] = useState<string | null>(null);
+
+    const [imageSize, setImageSize] = useState<{ width: number; height: number } | null>(null);
+
+    const [originalImageURL, setOriginalImageURL] = useState<string>("");
+    const [ditheredImageURL, setDitheredImageURL] = useState<string>("");
 
     const fileUpload = useFileUpload({ maxFiles: 1, accept: "image/*", disabled: !!originalImageURL });
     const isFileUploaded = fileUpload.acceptedFiles.length > 0;
 
     useEffect(() => {
-        setOriginalImageURL(isFileUploaded ? URL.createObjectURL(fileUpload.acceptedFiles[0]) : null);
+        if (isFileUploaded) {
+            const img = new Image();
+            img.onload = () => setImageSize({ width: img.width, height: img.height });
+            img.src = URL.createObjectURL(fileUpload.acceptedFiles[0]);
+            setOriginalImageURL(img.src);
+        } else {
+            setImageSize(null);
+            setOriginalImageURL("");
+        }
     }, [isFileUploaded, fileUpload.acceptedFiles]);
 
     useEffect(() => {
@@ -26,7 +37,7 @@ const FileUploadPage = () => {
             try {
                 const file = fileUpload.acceptedFiles[0];
                 const dataUrl = await ditherImage(file, ditheringMethod);
-                setDitheredImage(dataUrl);
+                setDitheredImageURL(dataUrl);
             } catch (error) {
                 console.error("Failed to process image:", error);
                 // TODO: Show error message to the user
@@ -76,8 +87,13 @@ const FileUploadPage = () => {
                                 >
                                     Clear image
                                 </button>
-                                {originalImageURL && ditheredImage && (
-                                    <ImageCompare beforeImage={originalImageURL} afterImage={ditheredImage} />
+                                {originalImageURL && ditheredImageURL && imageSize && (
+                                    <ImageCompare
+                                        beforeImage={originalImageURL}
+                                        afterImage={ditheredImageURL}
+                                        width={imageSize.width}
+                                        height={imageSize.height}
+                                    />
                                 )}
                             </>
                         )}
