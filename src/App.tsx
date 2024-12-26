@@ -8,6 +8,11 @@ import ImageModificationTable from "./components/ImageModificationTable";
 import { DitheringMethod, ditherImage } from "./utils/dithering";
 import { convertImageDataToDataURL, getImageDataFromFile } from "./utils/image";
 
+import ExampleImageDithered1 from "./assets/example_blueberry_dithered.png";
+import ExampleImageOriginal1 from "./assets/example_blueberry_original.png";
+import ExampleImageDithered2 from "./assets/example_strawberry_dithered.png";
+import ExampleImageOriginal2 from "./assets/example_strawberry_original.png";
+
 const FileUploadPage = () => {
     const [ditheringMethod, setDitheringMethod] = useState<DitheringMethod>(DitheringMethod.FloydSteinberg);
 
@@ -128,16 +133,65 @@ const FileUploadPage = () => {
             </main>
 
             {/* Usage section */}
-            <section className="bg-base-200 py-12">
-                <div className="container mx-auto px-8">
-                    <h2 className="text-2xl font-bold mb-4">Usage</h2>
-                    <p className="text-base-content/70">
-                        Upload an image using the file picker or drag and drop. Select your preferred dithering method
-                        from the dropdown menu. The original and dithered versions of your image will be displayed for
-                        comparison. Floyd-Steinberg dithering tends to create a more uniform pattern, while Stucki
-                        dithering can preserve more detail in some cases.
-                    </p>
-                </div>
+            <section className="pt-12 container mx-auto">
+                <h2 className="text-2xl font-bold mb-4">Usage</h2>
+                <p className="text-base-content/70">
+                    Upload an image using the file picker or drag and drop. Select your preferred dithering method from
+                    the dropdown menu. The original and dithered versions of your image will be displayed for
+                    comparison. Floyd-Steinberg dithering tends to create a more uniform pattern, while Stucki dithering
+                    can lead to a much smoother and more subtle output.
+                </p>
+            </section>
+
+            {/* Examples */}
+            <section className="py-12 container mx-auto">
+                <h2 className="text-2xl font-bold mb-4">Examples</h2>
+                <table className="table w-full text-sm">
+                    <thead>
+                        <tr>
+                            <th className="text-left font-medium text-gray-600 pb-2">Original</th>
+                            <th className="text-left font-medium text-gray-600 pb-2">Dithered</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td className="py-2">
+                                <img
+                                    src={ExampleImageOriginal1}
+                                    alt="Original example"
+                                    className="h-52 object-cover rounded-lg"
+                                />
+                                <p className="text-gray-500 mt-2">File size: 1.2MB. Image format: PNG</p>
+                            </td>
+                            <td className="py-2">
+                                <img
+                                    src={ExampleImageDithered1}
+                                    alt="Dithered example"
+                                    className="h-52 object-cover rounded-lg"
+                                />
+                                <p className="text-gray-500 mt-2">File size: 717.5 KB. Algorithm: Stucki</p>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td className="py-2">
+                                <img
+                                    src={ExampleImageOriginal2}
+                                    alt="Original example"
+                                    className="h-52 object-cover rounded-lg"
+                                />
+                                <p className="text-gray-500 mt-2">File size: 1.4MB. Image format: PNG</p>
+                            </td>
+                            <td className="py-2">
+                                <img
+                                    src={ExampleImageDithered2}
+                                    alt="Dithered example"
+                                    className="h-52 object-cover rounded-lg"
+                                />
+                                <p className="text-gray-500 mt-2">File size: 781.8KB. Algorithm: Floyd-Steinberg</p>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
             </section>
 
             <footer className="flex items-center justify-end gap-1 p-4 text-xs">
