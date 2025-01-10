@@ -6,6 +6,10 @@
     </p>
 </p>
 
+## Dithering Component Preview
+
+![Image comparison component effect](docs/image-comparison.png)
+
 ## Requirements
 * Bun 1.1.x
 
